@@ -1,22 +1,42 @@
 import streamlit as st
 from datetime import date
-from database import init_db, add_entry, get_all_entries
+from database import init_db, add_entry, get_all_entries, delete_entry
 from sentiment import analyze_text
+from transcribe import transcribe_audio
 
-init_db()  # ensures table exists every time app runs
+init_db()
 
 st.title("Mental Wellness Journal")
 
+st.subheader("Text Entry")
 entry_text = st.text_area("How are you feeling today?")
 
+st.subheader("Or record your entry")
+audio_value = st.audio_input("Record a voice entry")
+
+final_text = None
+
+# If audio was recorded, transcribe it and show an editable box
+if audio_value is not None:
+    transcribed = transcribe_audio(audio_value)
+    final_text = st.text_area("Review/edit your transcribed entry:", value=transcribed)
+elif entry_text.strip():
+    final_text = entry_text
+
 if st.button("Save Entry"):
-    if entry_text.strip():
-        neg, neu, pos, compound, length = analyze_text(entry_text)
-        add_entry(str(date.today()), entry_text, neg, neu, pos, compound, length)
+    if final_text and final_text.strip():
+        neg, neu, pos, compound, length = analyze_text(final_text)
+        add_entry(str(date.today()), final_text, neg, neu, pos, compound, length)
         st.success("Entry saved!")
     else:
-        st.warning("Please write something first.")
+        st.warning("Please write or record something first.")
 
 st.subheader("Your Entries So Far")
 for row in get_all_entries():
-    st.write(row)
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.write(row)
+    with col2:
+        if st.button("Delete", key=f"del_{row[0]}"):
+            delete_entry(row[0])
+            st.rerun()

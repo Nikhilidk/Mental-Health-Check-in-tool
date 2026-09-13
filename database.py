@@ -34,3 +34,8 @@ def get_all_entries():
     rows = cursor.fetchall()
     conn.close()
     return rows
+def delete_entry(entry_id):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("DELETE FROM entries WHERE id = ?", (entry_id,))
+    conn.commit()
+    conn.close()
