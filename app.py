@@ -3,6 +3,7 @@ from datetime import date
 from database import init_db, add_entry, get_all_entries, delete_entry
 from sentiment import analyze_text
 from transcribe import transcribe_audio
+from trend import get_entries_dataframe, compute_trend, get_trend_summary
 
 init_db()
 
@@ -40,3 +41,15 @@ for row in get_all_entries():
         if st.button("Delete", key=f"del_{row[0]}"):
             delete_entry(row[0])
             st.rerun()
+
+st.subheader("Your Trends")
+all_rows = get_all_entries()
+
+if len(all_rows) >= 2:
+    df = get_entries_dataframe(all_rows)
+    df, slope = compute_trend(df)
+
+    st.line_chart(df.set_index("date")[["compound", "rolling_avg"]])
+    st.write(get_trend_summary(slope))
+else:
+    st.info("Add a few more entries to start seeing your mood trend.")
