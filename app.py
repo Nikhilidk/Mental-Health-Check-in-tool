@@ -3,7 +3,7 @@ from datetime import date
 from database import init_db, add_entry, get_all_entries, delete_entry
 from sentiment import analyze_text
 from transcribe import transcribe_audio
-from trend import get_entries_dataframe, compute_trend, get_trend_summary
+from trend import get_entries_dataframe, daily_average, compute_trend, get_trend_summary
 
 init_db()
 
@@ -47,9 +47,13 @@ all_rows = get_all_entries()
 
 if len(all_rows) >= 2:
     df = get_entries_dataframe(all_rows)
-    df, slope = compute_trend(df)
+    df = daily_average(df)
+    df, slope, volatility = compute_trend(df)
 
     st.line_chart(df.set_index("date")[["compound", "rolling_avg"]])
-    st.write(get_trend_summary(slope))
+    st.write(get_trend_summary(df, slope, volatility))
+
+    if volatility is not None:
+        st.caption(f"Mood variability (std dev of scores): {volatility:.2f}")
 else:
     st.info("Add a few more entries to start seeing your mood trend.")
