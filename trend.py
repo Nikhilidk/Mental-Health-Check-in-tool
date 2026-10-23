@@ -58,13 +58,51 @@ def get_trend_summary(df, slope, volatility,
         if recent_mean > overall_mean + 0.2:
             return "Your mood has swung quite a bit lately, but your most recent entries are on a brighter note."
         elif recent_mean < overall_mean - 0.2:
-            return "Your mood has swung quite a bit lately, and your most recent entries are lower. Be kind to yourself, and consider talking to someone you trust."
-        else:
+            return "Your mood has swung quite a bit lately, and your most recent entries are lower."
             return "Your mood has been up and down lately."
 
     if slope > slope_threshold:
         return "Your mood has been trending more positive recently."
     elif slope < -slope_threshold:
-        return "Your mood has been trending lower recently. It might be worth checking in with yourself, or talking to someone you trust."
+        return "Your mood has been trending lower recently."
     else:
         return "Your mood has been relatively steady recently."
+
+def filter_window(df, days):
+    """Keep only the last `days` days, anchored on the most recent entry date."""
+    if df.empty:
+        return df
+    cutoff = df["date"].max() - pd.Timedelta(days=days - 1)
+    return df[df["date"] >= cutoff]
+
+def weekly_summary(df):
+    """Group daily values into calendar weeks (Mon-Sun)."""
+    df = df.copy()
+    df["week_start"] = df["date"] - pd.to_timedelta(df["date"].dt.weekday, unit="D")
+    weekly = (
+        df.groupby("week_start")
+          .agg(avg_mood=("compound", "mean"),
+               variability=("compound", "std"),
+               negative_language=("neg_ratio", "mean"),
+               days_logged=("date", "count"),
+               entries=("entry_count", "sum"))
+          .round(2)
+          .reset_index()
+          .sort_values("week_start")
+    )
+    weekly["week_start"] = weekly["week_start"].dt.date
+    return weekly
+    
+
+def get_support_nudge(df, min_days=3, threshold=-0.15):
+    """
+    Return a gentle suggestion if the last `min_days` days with entries are all low.
+    This flags a sustained low-mood pattern only. It does NOT assess risk or diagnose.
+    """
+    if len(df) < min_days:
+        return None
+    recent = df["compound"].tail(min_days)
+    if (recent < threshold).all():
+        return ("Your last few entries have all leaned low. That's worth paying attention to. "
+                "Talking with a friend, family member, or a counsellor can really help.")
+    return None
