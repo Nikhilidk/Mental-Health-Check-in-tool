@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sentiment import negative_word_ratio
 
 def get_entries_dataframe(rows):
     """Convert raw SQLite rows into a pandas DataFrame."""
@@ -7,6 +8,7 @@ def get_entries_dataframe(rows):
         "id", "date", "text", "neg", "neu", "pos", "compound", "entry_length"
     ])
     df["date"] = pd.to_datetime(df["date"])
+    df["neg_ratio"] = df["text"].apply(negative_word_ratio)  
     df = df.sort_values(["date", "id"])
     return df
 
@@ -16,6 +18,7 @@ def daily_average(df):
         df.groupby(df["date"].dt.date)
           .agg(compound=("compound", "mean"),
                neg=("neg", "mean"),
+               neg_ratio=("neg_ratio", "mean"),               
                entry_count=("id", "count"),
                total_words=("entry_length", "sum"))
           .reset_index()

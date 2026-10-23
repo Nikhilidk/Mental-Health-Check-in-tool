@@ -55,5 +55,8 @@ if len(all_rows) >= 2:
 
     if volatility is not None:
         st.caption(f"Mood variability (std dev of scores): {volatility:.2f}")
+
+    st.subheader("Negative language")
+    st.line_chart(df.set_index("date")[["neg_ratio"]])
 else:
     st.info("Add a few more entries to start seeing your mood trend.")
