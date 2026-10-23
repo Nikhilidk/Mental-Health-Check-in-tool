@@ -13,17 +13,19 @@ def init_db():
             neu REAL,
             pos REAL,
             compound REAL,
-            entry_length INTEGER
+            entry_length INTEGER,
+            mood_rating INTEGER
         )
     """)
     conn.commit()
     conn.close()
 
-def add_entry(date, text, neg, neu, pos, compound, entry_length):
+def add_entry(date, text, neg, neu, pos, compound, entry_length, mood_rating=None):
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
-        "INSERT INTO entries (date, text, neg, neu, pos, compound, entry_length) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (date, text, neg, neu, pos, compound, entry_length)
+        "INSERT INTO entries (date, text, neg, neu, pos, compound, entry_length, mood_rating) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (date, text, neg, neu, pos, compound, entry_length, mood_rating)
     )
     conn.commit()
     conn.close()
@@ -34,6 +36,7 @@ def get_all_entries():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
 def delete_entry(entry_id):
     conn = sqlite3.connect(DB_PATH)
     conn.execute("DELETE FROM entries WHERE id = ?", (entry_id,))

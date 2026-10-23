@@ -5,7 +5,7 @@ from sentiment import negative_word_ratio
 def get_entries_dataframe(rows):
     """Convert raw SQLite rows into a pandas DataFrame."""
     df = pd.DataFrame(rows, columns=[
-        "id", "date", "text", "neg", "neu", "pos", "compound", "entry_length"
+    "id", "date", "text", "neg", "neu", "pos", "compound", "entry_length", "mood_rating"
     ])
     df["date"] = pd.to_datetime(df["date"])
     df["neg_ratio"] = df["text"].apply(negative_word_ratio)  
