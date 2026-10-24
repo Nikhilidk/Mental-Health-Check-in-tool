@@ -52,7 +52,7 @@ def get_trend_summary(df, slope, volatility,
         return "Not enough entries yet to detect a trend."
 
     overall_mean = df["compound"].mean()
-    recent_mean = df["compound"].tail(2).mean()  # now = last two days
+    recent_mean = df["compound"].tail(3).mean()  # last three days smooths single-day dips
 
     if volatility > volatility_threshold:
         if recent_mean > overall_mean + 0.2:
@@ -105,4 +105,14 @@ def get_support_nudge(df, min_days=3, threshold=-0.15):
     if (recent < threshold).all():
         return ("Your last few entries have all leaned low. That's worth paying attention to. "
                 "Talking with a friend, family member, or a counsellor can really help.")
+    return None
+
+def get_activity_note(df, recent_days=3, drop=0.5):
+    """Flag a clear drop in how much the user writes (a non-sentiment signal)."""
+    if len(df) < recent_days + 2:
+        return None
+    recent = df["total_words"].tail(recent_days).mean()
+    earlier = df["total_words"].iloc[:-recent_days].mean()
+    if earlier > 0 and recent < earlier * drop:
+        return "You've been writing noticeably less than usual lately."
     return None

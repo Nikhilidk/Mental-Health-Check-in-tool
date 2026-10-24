@@ -5,7 +5,7 @@ from sentiment import analyze_text
 from transcribe import transcribe_audio
 from trend import (get_entries_dataframe, daily_average, compute_trend,
                    get_trend_summary, filter_window, weekly_summary,
-                   get_support_nudge)
+                   get_support_nudge, get_activity_note)
 
 st.set_page_config(page_title="Mental Wellness Journal", layout="wide")
 
@@ -98,10 +98,23 @@ with right:
             if len(weekly) >= 2:
                 latest, prev = weekly.iloc[-1], weekly.iloc[-2]
                 st.metric(
-                    "This week's average mood",
+                    f"This week's average mood ({latest['days_logged']} days logged)",
                     f"{latest['avg_mood']:.2f}",
                     delta=f"{latest['avg_mood'] - prev['avg_mood']:+.2f} vs last week",
                 )
+        st.subheader("Journaling activity")
+        activity = df.set_index("date")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.caption("Entries per day")
+            st.bar_chart(activity["entry_count"])
+        with c2:
+            st.caption("Words written per day")
+            st.bar_chart(activity["total_words"])
+
+        activity_note = get_activity_note(df)
+        if activity_note:
+            st.caption(activity_note)
     else:
         st.info("Add entries on at least two different days to start seeing your mood trend.")
 
