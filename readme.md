@@ -85,6 +85,17 @@ The app opens at http://localhost:8501.
 
 On a CPU-only laptop, transcription takes roughly as long as the recording (about 13 seconds for a 10-second clip with the `small` model).
 
+## Try it with demo data
+
+A fresh install has no entries, so the trend charts stay hidden. To load three weeks of made-up entries:
+
+```bash
+python sample_data/load_demo.py          # steady -> stressful -> recovery
+python sample_data/load_demo.py --low    # ends on three low days, to show the support nudge
+```
+
+All demo entries and ratings are fictional. The script only runs on an empty database; to reload, delete `data/entries.db` first.
+
 ## Evaluation
 
 To check whether the sentiment scores reflect how the user actually felt, 20 journal entries (1-20 October) were each rated 1-5 by the same person at the time of writing, then compared with VADER's score:
@@ -123,7 +134,7 @@ trend.py        Daily aggregation, trend, variability, weekly summary, nudge
 database.py     SQLite storage
 evaluate.py     Compares VADER scores with self-rated mood
 data/           Local database (not committed)
-sample_data/    Placeholder for example data
+sample_data/    Demo data loader (load_demo.py)
 ```
 
 ## Future work
@@ -136,4 +147,4 @@ sample_data/    Placeholder for example data
 
 Nikhil Negi
 
-Built as a beginner project with ML+NLP integration
+Beginner Project to integrate ML+NLP
