@@ -10,7 +10,7 @@ print("Rated entries:", len(df))
 
 stock = SentimentIntensityAnalyzer()   # unmodified VADER, for comparison
 df["stock"] = df["text"].apply(lambda t: stock.polarity_scores(t)["compound"])
-df["custom"] = df["text"].apply(lambda t: analyze_text(t)[3])   # with your custom lexicon
+df["custom"] = df["text"].apply(lambda t: analyze_text(t)[3])   #custom lexicon
 
 lab = lambda c: "pos" if c >= 0.05 else "neg" if c <= -0.05 else "neu"
 true = df["mood_rating"].apply(lambda r: "neg" if r <= 2 else "neu" if r == 3 else "pos")
